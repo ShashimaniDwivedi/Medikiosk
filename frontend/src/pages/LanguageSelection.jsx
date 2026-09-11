@@ -1,10 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+// import { usePatient } from "../context/PatientContext";
+import { usePatient } from "../context/usePatient";
 
 function LanguageSelection() {
-  const [selectedLanguage, setSelectedLanguage] = useState("");
-
   const navigate = useNavigate();
+
+  const { patient, updatePatient } = usePatient();
+
+  const [selectedLanguage, setSelectedLanguage] = useState(
+    patient.language || "",
+  );
 
   const languages = ["English", "हिंदी", "বাংলা", "मराठी", "தமிழ்", "తెలుగు"];
 
@@ -14,7 +20,7 @@ function LanguageSelection() {
       return;
     }
 
-    console.log("Selected Language:", selectedLanguage);
+    updatePatient("language", selectedLanguage);
 
     navigate("/consent");
   };
@@ -22,7 +28,7 @@ function LanguageSelection() {
   return (
     <div className="language-page">
       <div className="language-card">
-        <div className="logo">🏥</div>
+        <div className="logo">🌐</div>
 
         <h1>Select Your Language</h1>
 

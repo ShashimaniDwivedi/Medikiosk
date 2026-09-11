@@ -1,32 +1,16 @@
-// import { useNavigate } from "react-router-dom";
+// import { usePatient } from "../context/PatientContext";
+import { usePatient } from "../context/usePatient";
 
 function Review() {
-  //   const navigate = useNavigate();
-
-  const patient = {
-    name: "Patient Name",
-    age: "21",
-    gender: "Male",
-    phone: "XXXXXXXXXX",
-
-    mainProblem: "Headache",
-    duration: "3 days",
-    severity: "Moderate",
-    otherSymptoms: "Mild fever",
-
-    illnesses: "None",
-    medicines: "None",
-    allergies: "No known allergies",
-    surgeries: "None",
-    familyHistory: "No significant history",
-  };
+  const { patient } = usePatient();
 
   const handleSubmit = () => {
     console.log("Final Patient Data:", patient);
 
     alert("Information submitted successfully!");
 
-    // Later this will send data to FastAPI
+    // Later:
+    // Send patient data to FastAPI backend
   };
 
   return (
@@ -38,6 +22,17 @@ function Review() {
 
         <p>Please review your information before submitting.</p>
 
+        {/* Language */}
+
+        <div className="review-section">
+          <h2>Language</h2>
+
+          <div className="info-row">
+            <span>Selected Language</span>
+            <strong>{patient.language || "Not provided"}</strong>
+          </div>
+        </div>
+
         {/* Patient Details */}
 
         <div className="review-section">
@@ -45,22 +40,22 @@ function Review() {
 
           <div className="info-row">
             <span>Name</span>
-            <strong>{patient.name}</strong>
+            <strong>{patient.name || "Not provided"}</strong>
           </div>
 
           <div className="info-row">
             <span>Age</span>
-            <strong>{patient.age}</strong>
+            <strong>{patient.age || "Not provided"}</strong>
           </div>
 
           <div className="info-row">
             <span>Gender</span>
-            <strong>{patient.gender}</strong>
+            <strong>{patient.gender || "Not provided"}</strong>
           </div>
 
           <div className="info-row">
             <span>Phone</span>
-            <strong>{patient.phone}</strong>
+            <strong>{patient.phone || "Not provided"}</strong>
           </div>
         </div>
 
@@ -71,22 +66,22 @@ function Review() {
 
           <div className="info-row">
             <span>Main Problem</span>
-            <strong>{patient.mainProblem}</strong>
+            <strong>{patient.mainProblem || "Not provided"}</strong>
           </div>
 
           <div className="info-row">
             <span>Duration</span>
-            <strong>{patient.duration}</strong>
+            <strong>{patient.duration || "Not provided"}</strong>
           </div>
 
           <div className="info-row">
             <span>Severity</span>
-            <strong>{patient.severity}</strong>
+            <strong>{patient.severity || "Not provided"}</strong>
           </div>
 
           <div className="info-row">
             <span>Other Symptoms</span>
-            <strong>{patient.otherSymptoms}</strong>
+            <strong>{patient.otherSymptoms || "Not provided"}</strong>
           </div>
         </div>
 
@@ -97,27 +92,32 @@ function Review() {
 
           <div className="info-row">
             <span>Previous Illnesses</span>
-            <strong>{patient.illnesses}</strong>
+            <strong>{patient.illnesses || "None"}</strong>
           </div>
 
           <div className="info-row">
             <span>Current Medicines</span>
-            <strong>{patient.medicines}</strong>
+            <strong>{patient.medicines || "None"}</strong>
           </div>
 
           <div className="info-row">
             <span>Allergies</span>
-            <strong>{patient.allergies}</strong>
+            <strong>{patient.allergies || "None"}</strong>
           </div>
 
           <div className="info-row">
             <span>Previous Surgeries</span>
-            <strong>{patient.surgeries}</strong>
+            <strong>{patient.surgeries || "None"}</strong>
           </div>
 
           <div className="info-row">
             <span>Family History</span>
-            <strong>{patient.familyHistory}</strong>
+            <strong>{patient.familyHistory || "None"}</strong>
+          </div>
+
+          <div className="info-row">
+            <span>Medical Report</span>
+            <strong>{patient.reports || "No file uploaded"}</strong>
           </div>
         </div>
 

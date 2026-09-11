@@ -1,38 +1,44 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+// import { usePatient } from "../context/PatientContext";
+import { usePatient } from "../context/usePatient";
 
 function MedicalHistory() {
   const navigate = useNavigate();
 
+  const { patient, setPatientData } = usePatient();
+
   const [formData, setFormData] = useState({
-    illnesses: "",
-    medicines: "",
-    allergies: "",
-    surgeries: "",
-    familyHistory: "",
-    reports: null,
+    illnesses: patient.illnesses || "",
+    medicines: patient.medicines || "",
+    allergies: patient.allergies || "",
+    surgeries: patient.surgeries || "",
+    familyHistory: patient.familyHistory || "",
+    reports: patient.reports || "",
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setFormData({
-      ...formData,
+    setFormData((previous) => ({
+      ...previous,
       [name]: value,
-    });
+    }));
   };
 
   const handleFileChange = (e) => {
-    setFormData({
-      ...formData,
-      reports: e.target.files[0],
-    });
+    const file = e.target.files[0];
+
+    setFormData((previous) => ({
+      ...previous,
+      reports: file ? file.name : "",
+    }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    console.log("Medical History:", formData);
+    setPatientData(formData);
 
     navigate("/review");
   };
@@ -117,6 +123,8 @@ function MedicalHistory() {
             />
 
             <small>Supported formats: JPG, PNG, PDF</small>
+
+            {formData.reports && <p>Selected file: {formData.reports}</p>}
           </div>
 
           <button type="submit" className="continue-btn">

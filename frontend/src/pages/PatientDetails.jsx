@@ -1,29 +1,33 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+// import { usePatient } from "../context/PatientContext";
+import { usePatient } from "../context/usePatient";
 
 function PatientDetails() {
   const navigate = useNavigate();
 
+  const { patient, setPatientData } = usePatient();
+
   const [formData, setFormData] = useState({
-    name: "",
-    age: "",
-    gender: "",
-    phone: "",
+    name: patient.name || "",
+    age: patient.age || "",
+    gender: patient.gender || "",
+    phone: patient.phone || "",
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setFormData({
-      ...formData,
+    setFormData((previous) => ({
+      ...previous,
       [name]: value,
-    });
+    }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    console.log("Patient Details:", formData);
+    setPatientData(formData);
 
     navigate("/symptoms");
   };

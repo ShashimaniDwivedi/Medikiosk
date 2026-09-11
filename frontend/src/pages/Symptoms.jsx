@@ -1,29 +1,33 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+// import { usePatient } from "../context/PatientContext";
+import { usePatient } from "../context/usePatient";
 
 function Symptoms() {
   const navigate = useNavigate();
 
+  const { patient, setPatientData } = usePatient();
+
   const [formData, setFormData] = useState({
-    mainProblem: "",
-    duration: "",
-    severity: "",
-    otherSymptoms: "",
+    mainProblem: patient.mainProblem || "",
+    duration: patient.duration || "",
+    severity: patient.severity || "",
+    otherSymptoms: patient.otherSymptoms || "",
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setFormData({
-      ...formData,
+    setFormData((previous) => ({
+      ...previous,
       [name]: value,
-    });
+    }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    console.log("Symptoms:", formData);
+    setPatientData(formData);
 
     navigate("/medical-history");
   };
@@ -74,7 +78,6 @@ function Symptoms() {
               required
             >
               <option value="">Select severity</option>
-
               <option value="Mild">Mild</option>
               <option value="Moderate">Moderate</option>
               <option value="Severe">Severe</option>
