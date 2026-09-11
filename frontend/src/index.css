@@ -1,0 +1,434 @@
+/* =========================
+   GLOBAL
+========================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f5f9fc;
+  color: #1f2937;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+/* =========================
+   COMMON
+========================= */
+
+.logo {
+  font-size: 45px;
+  margin-bottom: 15px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 13px;
+  border: 1px solid #d1d5db;
+  border-radius: 9px;
+  font-size: 15px;
+  outline: none;
+  background: white;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: #2563eb;
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+.continue-btn {
+  width: 100%;
+  padding: 14px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 10px;
+  background: #2563eb;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.continue-btn:hover {
+  background: #1d4ed8;
+}
+
+/* =========================
+   LANGUAGE SELECTION
+========================= */
+
+.language-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+  background: #f5f9fc;
+}
+
+.language-card {
+  width: 500px;
+  padding: 45px;
+  background: white;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.language-card h1 {
+  font-size: 30px;
+  margin-bottom: 10px;
+}
+
+.language-card p {
+  color: #6b7280;
+  margin-bottom: 25px;
+  line-height: 1.5;
+}
+
+.language-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.language-btn {
+  padding: 14px;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.language-btn:hover {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.language-btn.selected {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+/* =========================
+   CONSENT
+========================= */
+
+.consent-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+  background: #f5f9fc;
+}
+
+.consent-card {
+  width: 550px;
+  padding: 45px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.consent-card h1 {
+  margin-bottom: 12px;
+  font-size: 30px;
+}
+
+.consent-card > p {
+  color: #6b7280;
+  line-height: 1.6;
+  margin-bottom: 25px;
+}
+
+.consent-box {
+  padding: 20px;
+  margin-bottom: 22px;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+.consent-box h3 {
+  margin-bottom: 12px;
+}
+
+.consent-box ul {
+  padding-left: 20px;
+}
+
+.consent-box li {
+  margin-bottom: 9px;
+  line-height: 1.5;
+}
+
+.checkbox-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.checkbox-row input {
+  margin-top: 3px;
+}
+
+/* =========================
+   PATIENT DETAILS
+========================= */
+
+.patient-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+  background: #f5f9fc;
+}
+
+.patient-card {
+  width: 500px;
+  padding: 40px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.patient-card h1 {
+  font-size: 30px;
+  margin-bottom: 10px;
+}
+
+.patient-card > p {
+  color: #6b7280;
+  margin-bottom: 25px;
+}
+
+/* =========================
+   SYMPTOMS
+========================= */
+
+.symptoms-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+  background: #f5f9fc;
+}
+
+.symptoms-card {
+  width: 550px;
+  padding: 40px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.symptoms-card h1 {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.symptoms-card > p {
+  color: #6b7280;
+  margin-bottom: 25px;
+}
+
+/* =========================
+   MEDICAL HISTORY
+========================= */
+
+.history-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+  background: #f5f9fc;
+}
+
+.history-card {
+  width: 600px;
+  padding: 40px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.history-card h1 {
+  font-size: 30px;
+  margin-bottom: 10px;
+}
+
+.history-card > p {
+  color: #6b7280;
+  margin-bottom: 25px;
+}
+
+.history-card input[type="file"] {
+  padding: 12px;
+  border: 1px dashed #9ca3af;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.history-card small {
+  display: block;
+  margin-top: 7px;
+  color: #6b7280;
+}
+
+/* =========================
+   REVIEW
+========================= */
+
+.review-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+  background: #f5f9fc;
+}
+
+.review-card {
+  width: 650px;
+  padding: 40px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.review-card h1 {
+  font-size: 30px;
+  margin-bottom: 10px;
+}
+
+.review-card > p {
+  color: #6b7280;
+  margin-bottom: 25px;
+}
+
+.review-section {
+  padding: 20px;
+  margin-bottom: 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+.review-section h2 {
+  font-size: 19px;
+  margin-bottom: 15px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 11px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-row span {
+  color: #6b7280;
+}
+
+.info-row strong {
+  text-align: right;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 10px;
+  background: #16a34a;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.submit-btn:hover {
+  background: #15803d;
+}
+
+.success-message {
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #ecfdf5;
+  color: #047857;
+  text-align: center;
+}
+
+/* =========================
+   MOBILE RESPONSIVE
+========================= */
+
+@media (max-width: 650px) {
+  .language-card,
+  .consent-card,
+  .patient-card,
+  .symptoms-card,
+  .history-card,
+  .review-card {
+    width: 100%;
+    padding: 25px;
+  }
+
+  .language-list {
+    grid-template-columns: 1fr;
+  }
+
+  .info-row {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .info-row strong {
+    text-align: left;
+  }
+}
