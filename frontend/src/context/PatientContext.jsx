@@ -19,7 +19,12 @@ const emptyPatient = {
   allergies: "",
   surgeries: "",
   familyHistory: "",
+
+  // Cloudinary PDF URL
   reports: "",
+
+  // Actual PDF file - local only
+  reportFile: null,
 };
 
 export const PatientProvider = ({ children }) => {
@@ -27,16 +32,32 @@ export const PatientProvider = ({ children }) => {
     const savedData = localStorage.getItem("medikiosk_patient");
 
     if (savedData) {
-      return JSON.parse(savedData);
+      try {
+        return {
+          ...emptyPatient,
+          ...JSON.parse(savedData),
+          reportFile: null,
+        };
+      } catch (error) {
+        console.error("Failed to load patient data:", error);
+      }
     }
 
     return { ...emptyPatient };
   });
 
+  // Save patient information to localStorage
+  // BUT DON'T SAVE reportFile
   useEffect(() => {
-    localStorage.setItem("medikiosk_patient", JSON.stringify(patient));
+    const dataToSave = {
+      ...patient,
+      reportFile: null,
+    };
+
+    localStorage.setItem("medikiosk_patient", JSON.stringify(dataToSave));
   }, [patient]);
 
+  // Update one field
   const updatePatient = (field, value) => {
     setPatient((previous) => ({
       ...previous,
@@ -44,6 +65,7 @@ export const PatientProvider = ({ children }) => {
     }));
   };
 
+  // Update multiple fields
   const setPatientData = (data) => {
     setPatient((previous) => ({
       ...previous,
@@ -51,8 +73,10 @@ export const PatientProvider = ({ children }) => {
     }));
   };
 
+  // Clear patient data
   const clearPatient = () => {
     setPatient({ ...emptyPatient });
+
     localStorage.removeItem("medikiosk_patient");
   };
 
@@ -60,6 +84,7 @@ export const PatientProvider = ({ children }) => {
     <PatientContext.Provider
       value={{
         patient,
+        setPatient,
         updatePatient,
         setPatientData,
         clearPatient,
