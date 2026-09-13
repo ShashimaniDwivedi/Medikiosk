@@ -1,27 +1,32 @@
 import { useState } from "react";
 import { usePatient } from "../context/usePatient";
+import { useNavigate } from "react-router-dom";
 
 function Review() {
   const { patient, setPatientData } = usePatient();
 
+  const navigate = useNavigate();
+
   const [loading, setLoading] = useState(false);
+
+  // =====================================================
+  // SUBMIT
+  // =====================================================
 
   const handleSubmit = async () => {
     try {
       setLoading(true);
 
-      let reportUrl = patient.reports || "";
+      // =================================================
+      // PDF CLOUDINARY UPLOAD
+      // =================================================
 
-      // ==========================================
-      // 1. PDF → Node Backend → Cloudinary
-      // ==========================================
+      let reportUrl = patient.reports || "";
 
       if (patient.reportFile) {
         const formData = new FormData();
 
         formData.append("pdf", patient.reportFile);
-
-        console.log("Uploading PDF...");
 
         const uploadResponse = await fetch(
           "http://localhost:5000/api/pdf/upload",
@@ -37,45 +42,63 @@ function Review() {
           throw new Error(uploadData.message || "PDF upload failed");
         }
 
-        console.log("Cloudinary Response:", uploadData);
-
-        // Cloudinary URL
         reportUrl = uploadData.url;
 
-        // Context mein URL save
+        // Save Cloudinary URL
         setPatientData({
           reports: reportUrl,
         });
       }
 
-      // ==========================================
-      // 2. Patient Data → Python Backend
-      // ==========================================
+      // =================================================
+      // PATIENT DATA
+      // =================================================
 
       const patientData = {
         language: patient.language || "",
 
         name: patient.name || "",
-        age: patient.age || "",
+
+        age: patient.age ? Number(patient.age) : null,
+
         gender: patient.gender || "",
+
         phone: patient.phone || "",
 
+        // Symptoms
+
         mainProblem: patient.mainProblem || "",
+
         duration: patient.duration || "",
+
         severity: patient.severity || "",
+
         otherSymptoms: patient.otherSymptoms || "",
 
+        // Medical History
+
         illnesses: patient.illnesses || "",
+
         medicines: patient.medicines || "",
+
         allergies: patient.allergies || "",
+
         surgeries: patient.surgeries || "",
+
         familyHistory: patient.familyHistory || "",
 
-        // Cloudinary URL
+        // PDF
+
         reports: reportUrl,
+
+        // AI Interview
+
+        aiInterview: patient.aiInterview || [],
       };
 
-      console.log("Sending patient data:", patientData);
+      // =================================================
+      // SEND TO FASTAPI
+      // =================================================
 
       const response = await fetch("http://127.0.0.1:8000/patients", {
         method: "POST",
@@ -93,9 +116,15 @@ function Review() {
         throw new Error(data.detail || "Failed to submit patient information");
       }
 
-      console.log("Python Backend Response:", data);
+      // =================================================
+      // SUCCESS
+      // =================================================
 
-      alert("Patient information submitted successfully!");
+      alert(
+        `Patient information submitted successfully!\nPatient ID: ${data.patient_id}`,
+      );
+
+      console.log("Patient saved:", data);
     } catch (error) {
       console.error("Submit Error:", error);
 
@@ -108,13 +137,19 @@ function Review() {
   return (
     <div className="review-page">
       <div className="review-card">
+        {/* =================================================
+            HEADER
+        ================================================= */}
+
         <div className="logo">📋</div>
 
         <h1>Review Your Information</h1>
 
         <p>Please review your information before submitting.</p>
 
-        {/* ================= LANGUAGE ================= */}
+        {/* =================================================
+            LANGUAGE
+        ================================================= */}
 
         <div className="review-section">
           <h2>Language</h2>
@@ -126,7 +161,9 @@ function Review() {
           </div>
         </div>
 
-        {/* ================= PATIENT DETAILS ================= */}
+        {/* =================================================
+            PATIENT DETAILS
+        ================================================= */}
 
         <div className="review-section">
           <h2>Patient Details</h2>
@@ -156,7 +193,9 @@ function Review() {
           </div>
         </div>
 
-        {/* ================= SYMPTOMS ================= */}
+        {/* =================================================
+            SYMPTOMS
+        ================================================= */}
 
         <div className="review-section">
           <h2>Symptoms</h2>
@@ -186,7 +225,9 @@ function Review() {
           </div>
         </div>
 
-        {/* ================= MEDICAL HISTORY ================= */}
+        {/* =================================================
+            MEDICAL HISTORY
+        ================================================= */}
 
         <div className="review-section">
           <h2>Medical History</h2>
@@ -221,8 +262,6 @@ function Review() {
             <strong>{patient.familyHistory || "None"}</strong>
           </div>
 
-          {/* ================= PDF ================= */}
-
           <div className="info-row">
             <span>Medical Report</span>
 
@@ -236,15 +275,49 @@ function Review() {
           </div>
         </div>
 
-        {/* ================= SUBMIT ================= */}
+        {/* =================================================
+            AI INTERVIEW
+        ================================================= */}
 
-        <button
-          className="submit-btn"
-          onClick={handleSubmit}
-          disabled={loading}
-        >
-          {loading ? "Uploading Report..." : "Submit Information ✓"}
-        </button>
+        <div className="review-section">
+          <h2>🤖 AI Interview</h2>
+
+          {patient.aiInterview && patient.aiInterview.length > 0 ? (
+            patient.aiInterview.map((item, index) => (
+              <div className="answer-item" key={index}>
+                <strong>
+                  Q{index + 1}. {item.question}
+                </strong>
+
+                <p>{item.answer}</p>
+              </div>
+            ))
+          ) : (
+            <p>No AI interview responses.</p>
+          )}
+        </div>
+
+        {/* =================================================
+            BUTTONS
+        ================================================= */}
+
+        <div className="review-buttons">
+          <button
+            className="back-btn"
+            onClick={() => navigate("/medical-history")}
+            disabled={loading}
+          >
+            ← Back
+          </button>
+
+          <button
+            className="submit-btn"
+            onClick={handleSubmit}
+            disabled={loading}
+          >
+            {loading ? "Saving..." : "Submit Information ✓"}
+          </button>
+        </div>
       </div>
     </div>
   );

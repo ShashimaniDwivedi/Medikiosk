@@ -1,105 +1,152 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-// import { usePatient } from "../context/PatientContext";
 import { usePatient } from "../context/usePatient";
 
 function Symptoms() {
+  const { patient, updatePatient } = usePatient();
   const navigate = useNavigate();
 
-  const { patient, setPatientData } = usePatient();
+  const [error, setError] = useState("");
 
-  const [formData, setFormData] = useState({
-    mainProblem: patient.mainProblem || "",
-    duration: patient.duration || "",
-    severity: patient.severity || "",
-    otherSymptoms: patient.otherSymptoms || "",
-  });
+  const handleNext = () => {
+    setError("");
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+    // Main problem is required
+    if (!patient.mainProblem.trim()) {
+      setError("Please enter your main problem.");
+      return;
+    }
 
-    setFormData((previous) => ({
-      ...previous,
-      [name]: value,
-    }));
-  };
+    // Duration is required
+    if (!patient.duration.trim()) {
+      setError("Please enter how long you have had this problem.");
+      return;
+    }
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+    // Severity is required
+    if (!patient.severity) {
+      setError("Please select the severity.");
+      return;
+    }
 
-    setPatientData(formData);
-
-    navigate("/medical-history");
+    // Go to AI Interview
+    navigate("/ai-interview");
   };
 
   return (
     <div className="symptoms-page">
       <div className="symptoms-card">
-        <div className="logo">🩺</div>
+        {/* Header */}
+        <div className="page-header">
+          <div className="header-icon">🩺</div>
 
-        <h1>Tell Us About Your Symptoms</h1>
+          <div>
+            <h1>Tell Us About Your Symptoms</h1>
 
-        <p>Please describe what you are experiencing.</p>
-
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>What is your main problem?</label>
-
-            <textarea
-              name="mainProblem"
-              placeholder="Example: I have a headache..."
-              value={formData.mainProblem}
-              onChange={handleChange}
-              rows="4"
-              required
-            />
+            <p>Please provide information about your current health problem.</p>
           </div>
+        </div>
 
-          <div className="form-group">
-            <label>How long have you had this problem?</label>
+        {/* Main Problem */}
+        <div className="form-group">
+          <label htmlFor="mainProblem">What is your main problem?</label>
 
-            <input
-              type="text"
-              name="duration"
-              placeholder="Example: 3 days"
-              value={formData.duration}
-              onChange={handleChange}
-              required
-            />
+          <textarea
+            id="mainProblem"
+            value={patient.mainProblem}
+            onChange={(e) => updatePatient("mainProblem", e.target.value)}
+            placeholder="For example: headache, stomach pain, fever..."
+            rows={4}
+          />
+        </div>
+
+        {/* Duration */}
+        <div className="form-group">
+          <label htmlFor="duration">How long have you had this problem?</label>
+
+          <input
+            id="duration"
+            type="text"
+            value={patient.duration}
+            onChange={(e) => updatePatient("duration", e.target.value)}
+            placeholder="For example: 2 days, 1 week, 3 months..."
+          />
+        </div>
+
+        {/* Severity */}
+        <div className="form-group">
+          <label>How severe is the problem?</label>
+
+          <div className="severity-options">
+            <label className="severity-option">
+              <input
+                type="radio"
+                name="severity"
+                value="Mild"
+                checked={patient.severity === "Mild"}
+                onChange={(e) => updatePatient("severity", e.target.value)}
+              />
+
+              <span>Mild</span>
+            </label>
+
+            <label className="severity-option">
+              <input
+                type="radio"
+                name="severity"
+                value="Moderate"
+                checked={patient.severity === "Moderate"}
+                onChange={(e) => updatePatient("severity", e.target.value)}
+              />
+
+              <span>Moderate</span>
+            </label>
+
+            <label className="severity-option">
+              <input
+                type="radio"
+                name="severity"
+                value="Severe"
+                checked={patient.severity === "Severe"}
+                onChange={(e) => updatePatient("severity", e.target.value)}
+              />
+
+              <span>Severe</span>
+            </label>
           </div>
+        </div>
 
-          <div className="form-group">
-            <label>How severe is it?</label>
+        {/* Other Symptoms */}
+        <div className="form-group">
+          <label htmlFor="otherSymptoms">
+            Are you experiencing any other symptoms?
+          </label>
 
-            <select
-              name="severity"
-              value={formData.severity}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select severity</option>
-              <option value="Mild">Mild</option>
-              <option value="Moderate">Moderate</option>
-              <option value="Severe">Severe</option>
-            </select>
-          </div>
+          <textarea
+            id="otherSymptoms"
+            value={patient.otherSymptoms}
+            onChange={(e) => updatePatient("otherSymptoms", e.target.value)}
+            placeholder="For example: nausea, weakness, cough..."
+            rows={4}
+          />
+        </div>
 
-          <div className="form-group">
-            <label>Any other symptoms?</label>
+        {/* Error */}
+        {error && <div className="form-error">⚠️ {error}</div>}
 
-            <textarea
-              name="otherSymptoms"
-              placeholder="Example: fever, cough, weakness..."
-              value={formData.otherSymptoms}
-              onChange={handleChange}
-              rows="3"
-            />
-          </div>
-
-          <button type="submit" className="continue-btn">
-            Continue →
+        {/* Navigation */}
+        <div className="button-container">
+          <button
+            className="back-btn"
+            onClick={() => navigate("/patient-details")}
+          >
+            ← Back
           </button>
-        </form>
+
+          <button className="next-btn" onClick={handleNext}>
+            Continue to AI Interview →
+          </button>
+        </div>
       </div>
     </div>
   );

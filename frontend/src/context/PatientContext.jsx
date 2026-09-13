@@ -20,11 +20,11 @@ const emptyPatient = {
   surgeries: "",
   familyHistory: "",
 
-  // Cloudinary PDF URL
   reports: "",
-
-  // Actual PDF file - local only
   reportFile: null,
+
+  // AI interview answers
+  aiInterview: [],
 };
 
 export const PatientProvider = ({ children }) => {
@@ -36,6 +36,8 @@ export const PatientProvider = ({ children }) => {
         return {
           ...emptyPatient,
           ...JSON.parse(savedData),
+
+          // File cannot be stored in localStorage
           reportFile: null,
         };
       } catch (error) {
@@ -43,21 +45,30 @@ export const PatientProvider = ({ children }) => {
       }
     }
 
-    return { ...emptyPatient };
+    return {
+      ...emptyPatient,
+    };
   });
 
-  // Save patient information to localStorage
-  // BUT DON'T SAVE reportFile
+  // -----------------------------
+  // SAVE DATA TO LOCAL STORAGE
+  // -----------------------------
+
   useEffect(() => {
     const dataToSave = {
       ...patient,
+
+      // File object cannot be stored
       reportFile: null,
     };
 
     localStorage.setItem("medikiosk_patient", JSON.stringify(dataToSave));
   }, [patient]);
 
-  // Update one field
+  // -----------------------------
+  // UPDATE ONE FIELD
+  // -----------------------------
+
   const updatePatient = (field, value) => {
     setPatient((previous) => ({
       ...previous,
@@ -65,7 +76,10 @@ export const PatientProvider = ({ children }) => {
     }));
   };
 
-  // Update multiple fields
+  // -----------------------------
+  // UPDATE MULTIPLE FIELDS
+  // -----------------------------
+
   const setPatientData = (data) => {
     setPatient((previous) => ({
       ...previous,
@@ -73,9 +87,14 @@ export const PatientProvider = ({ children }) => {
     }));
   };
 
-  // Clear patient data
+  // -----------------------------
+  // CLEAR PATIENT
+  // -----------------------------
+
   const clearPatient = () => {
-    setPatient({ ...emptyPatient });
+    setPatient({
+      ...emptyPatient,
+    });
 
     localStorage.removeItem("medikiosk_patient");
   };
