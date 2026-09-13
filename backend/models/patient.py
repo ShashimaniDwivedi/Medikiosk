@@ -25,3 +25,6 @@ class Patient(Base):
     family_history = Column(Text)
 
     reports = Column(String(255))
+
+    # AI Interview
+    ai_interview = Column(Text)

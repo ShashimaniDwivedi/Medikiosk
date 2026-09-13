@@ -1,23 +1,31 @@
-from typing import Optional
 from pydantic import BaseModel
+from typing import List, Dict, Any
 
 
 class PatientCreate(BaseModel):
-    language: Optional[str] = None
+
+    language: str = ""
+
     name: str
-    age: Optional[int] = None
-    gender: Optional[str] = None
-    phone: Optional[str] = None
+    age: int | None = None
+    gender: str = ""
+    phone: str = ""
 
-    mainProblem: Optional[str] = None
-    duration: Optional[str] = None
-    severity: Optional[str] = None
-    otherSymptoms: Optional[str] = None
+    # Symptoms
+    mainProblem: str = ""
+    duration: str = ""
+    severity: str = ""
+    otherSymptoms: str = ""
 
-    illnesses: Optional[str] = None
-    medicines: Optional[str] = None
-    allergies: Optional[str] = None
-    surgeries: Optional[str] = None
-    familyHistory: Optional[str] = None
+    # Medical History
+    illnesses: str = ""
+    medicines: str = ""
+    allergies: str = ""
+    surgeries: str = ""
+    familyHistory: str = ""
 
-    reports: Optional[str] = None
+    # Medical Report
+    reports: str = ""
+
+    # AI Interview
+    aiInterview: List[Dict[str, Any]] = []

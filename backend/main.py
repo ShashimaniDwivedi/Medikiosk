@@ -5,11 +5,19 @@ from fastapi.staticfiles import StaticFiles
 from database.connection import Base, engine
 from models import patient
 from routes.patient import router as patient_router
+from routes.ai.ai import router as ai_router
 
 
-# Create database tables
+# =========================
+# Create Database Tables
+# =========================
+
 Base.metadata.create_all(bind=engine)
 
+
+# =========================
+# FastAPI App
+# =========================
 
 app = FastAPI(
     title="MediKiosk API",
@@ -17,17 +25,25 @@ app = FastAPI(
 )
 
 
+# =========================
 # CORS
+# =========================
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[
+        "http://localhost:5173"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-# Serve uploaded files
+# =========================
+# Serve Uploaded Files
+# =========================
+
 app.mount(
     "/uploads",
     StaticFiles(directory="uploads"),
@@ -35,9 +51,23 @@ app.mount(
 )
 
 
-# Patient routes
+# =========================
+# Patient Routes
+# =========================
+
 app.include_router(patient_router)
 
+
+# =========================
+# AI Routes
+# =========================
+
+app.include_router(ai_router)
+
+
+# =========================
+# Home Route
+# =========================
 
 @app.get("/")
 def home():
