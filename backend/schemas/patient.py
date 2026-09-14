@@ -29,3 +29,6 @@ class PatientCreate(BaseModel):
 
     # AI Interview
     aiInterview: List[Dict[str, Any]] = []
+
+    # Viewed status
+    viewed: bool = False

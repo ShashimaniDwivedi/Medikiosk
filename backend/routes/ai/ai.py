@@ -30,14 +30,20 @@ router = APIRouter(
 api_key = os.getenv("GEMINI_API_KEY")
 
 if not api_key:
-    raise ValueError(
-        "GEMINI_API_KEY is missing in .env"
-    )
+    raise ValueError("GEMINI_API_KEY is missing in .env")
 
 
 client = genai.Client(
     api_key=api_key
 )
+
+
+# =========================================================
+# CONSTANTS
+# =========================================================
+
+MIN_QUESTIONS = 5
+MAX_QUESTIONS = 10
 
 
 # =========================================================
@@ -92,27 +98,31 @@ be reviewed by a healthcare professional.
 
 IMPORTANT RULES:
 
-1. Ask a maximum of 10 questions.
+1. The interview must contain BETWEEN 5 AND 10 questions.
 
-2. Questions must be relevant to the patient's
+2. NEVER finish the interview before 5 questions.
+
+3. NEVER ask more than 10 questions.
+
+4. Questions must be relevant to the patient's
    complaint and previous answers.
 
-3. Do not ask random questions.
+5. Do not ask random questions.
 
-4. Do not unnecessarily repeat information
+6. Do not unnecessarily repeat information
    already provided by the patient.
 
-5. Use simple language that a normal patient
+7. Use simple language that a normal patient
    can understand.
 
-6. Adapt the next question according to:
+8. Adapt the next question according to:
    - Main problem
    - Duration
    - Severity
    - Other symptoms
    - Previous answers
 
-7. Try to collect useful history such as:
+9. Try to collect useful history such as:
    - Main complaint
    - Duration
    - Severity
@@ -124,22 +134,23 @@ IMPORTANT RULES:
    - Family history
    - Other relevant information
 
-8. Do not ask all topics in a fixed order.
-   Choose the most relevant next question.
+10. Do not ask all topics in a fixed order.
+    Choose the most relevant next question.
 
-9. If the patient's answer requires an
-   important follow-up question, ask that first.
+11. If the patient's answer requires an
+    important follow-up question, ask that first.
 
-10. Never diagnose the patient.
+12. Never diagnose the patient.
 
-11. Never prescribe treatment.
+13. Never prescribe treatment.
 
-12. Return ONLY ONE question.
+14. Return ONLY ONE question when asked
+    to generate a question.
 
-13. Do not add explanations before or after
+15. Do not add explanations before or after
     the question.
 
-14. Ask the question in the patient's
+16. Ask the question in the patient's
     selected language.
 """
 
@@ -149,15 +160,12 @@ IMPORTANT RULES:
 # =========================================================
 
 @router.post("/start")
-def start_interview(
-    request: StartRequest
-):
+def start_interview(request: StartRequest):
 
     try:
 
         prompt = f"""
 {SYSTEM_PROMPT}
-
 
 PATIENT INFORMATION FROM THE SYMPTOMS FORM
 -------------------------------------------
@@ -189,84 +197,62 @@ Ask the FIRST most relevant follow-up question.
 Return ONLY the question.
 """
 
-
         response = client.models.generate_content(
-
             model="gemini-flash-lite-latest",
-
             contents=prompt
-
         )
 
-
         return {
-
             "success": True,
-
             "question_number": 1,
-
-            "question":
-                response.text.strip()
-
+            "question": response.text.strip(),
+            "total_questions": None
         }
-
 
     except Exception as e:
 
-        print(
-            "AI Start Error:",
-            e
-        )
+        print("AI Start Error:", e)
 
         raise HTTPException(
-
             status_code=500,
-
             detail=str(e)
-
         )
 
 
 # =========================================================
-# NEXT QUESTION
+# NEXT QUESTION / FINISH DECISION
 # =========================================================
 
 @router.post("/answer")
-def next_question(
-    request: AnswerRequest
-):
+def next_question(request: AnswerRequest):
 
     try:
 
-        # -----------------------------------------------
-        # Stop after question 10
-        # -----------------------------------------------
+        current_number = request.question_number
 
-        if request.question_number >= 10:
+        # =================================================
+        # HARD MAXIMUM
+        # =================================================
+
+        if current_number >= MAX_QUESTIONS:
 
             return {
-
                 "success": True,
-
                 "finished": True,
-
-                "message":
-                    "Interview completed"
-
+                "total_questions": MAX_QUESTIONS,
+                "message": "Interview completed"
             }
 
 
-        # -----------------------------------------------
-        # Build conversation history
-        # -----------------------------------------------
+        # =================================================
+        # BUILD CONVERSATION HISTORY
+        # =================================================
 
         conversation = ""
-
 
         for item in request.history:
 
             conversation += f"""
-
 Question:
 {item.get("question")}
 
@@ -275,95 +261,143 @@ Patient Answer:
 
 """
 
-
         # Add current question + answer
 
         conversation += f"""
-
 Question:
 {request.question}
 
 Patient Answer:
 {request.answer}
-
 """
 
 
-        # -----------------------------------------------
-        # Generate next question
-        # -----------------------------------------------
+        # =================================================
+        # AFTER 5 QUESTIONS
+        # AI DECIDES WHETHER TO FINISH
+        # =================================================
+
+        if current_number >= MIN_QUESTIONS:
+
+            decision_prompt = f"""
+You are controlling an adaptive medical history interview.
+
+The interview must contain between 5 and 10 questions.
+
+The patient has now answered question {current_number}.
+
+PATIENT INTERVIEW HISTORY
+-------------------------
+
+{conversation}
+
+Decide whether enough useful medical history has
+been collected.
+
+You may FINISH only if:
+- At least 5 questions have been answered.
+- The available information is reasonably sufficient.
+- No important follow-up question is clearly needed.
+
+You should CONTINUE if:
+- An important symptom needs clarification.
+- The patient's previous answer requires follow-up.
+- Important relevant history is still missing.
+- More information would meaningfully help a healthcare professional.
+
+You MUST finish if question {current_number} is 10.
+
+Return ONLY one word:
+
+FINISH
+
+or
+
+CONTINUE
+"""
+
+            decision_response = client.models.generate_content(
+                model="gemini-flash-lite-latest",
+                contents=decision_prompt
+            )
+
+            decision = decision_response.text.strip().upper()
+
+            # Remove accidental extra text
+            if "FINISH" in decision:
+                decision = "FINISH"
+            elif "CONTINUE" in decision:
+                decision = "CONTINUE"
+
+
+            # =================================================
+            # FINISH INTERVIEW
+            # =================================================
+
+            if decision == "FINISH":
+
+                return {
+                    "success": True,
+                    "finished": True,
+                    "total_questions": current_number,
+                    "message": "Interview completed"
+                }
+
+
+        # =================================================
+        # GENERATE NEXT QUESTION
+        # =================================================
+
+        next_number = current_number + 1
 
         prompt = f"""
 {SYSTEM_PROMPT}
-
 
 PATIENT'S INTERVIEW HISTORY
 ---------------------------
 
 {conversation}
 
+The patient has answered {current_number} questions.
 
-The current question number is:
+The next question will be question {next_number}.
 
-{request.question_number}
+Generate the SINGLE most relevant question based
+on everything the patient has said.
 
+IMPORTANT:
 
-Generate the next most relevant question.
-
-This will be question number:
-
-{request.question_number + 1}
-
-
-Important:
-
-- Consider everything the patient has already said.
-- Do not repeat questions unnecessarily.
+- Do not repeat information already provided.
 - Ask only one question.
 - Keep it short and easy to understand.
-- Ask in the same language used by the patient.
+- Make it relevant to the patient's complaint.
+- Follow up on important information when necessary.
+- Ask in the patient's language.
 - Do not diagnose.
 - Do not recommend treatment.
+- The total interview must not exceed 10 questions.
 
 Return ONLY the question.
 """
 
-
         response = client.models.generate_content(
-
             model="gemini-flash-lite-latest",
-
             contents=prompt
-
         )
 
-
         return {
-
             "success": True,
-
             "finished": False,
-
-            "question_number":
-                request.question_number + 1,
-
-            "question":
-                response.text.strip()
-
+            "question_number": next_number,
+            "question": response.text.strip(),
+            "total_questions": None
         }
-
 
     except Exception as e:
 
-        print(
-            "AI Answer Error:",
-            e
-        )
+        print("AI Answer Error:", e)
 
         raise HTTPException(
-
             status_code=500,
-
             detail=str(e)
-
         )

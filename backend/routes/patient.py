@@ -41,7 +41,6 @@ async def upload_report(
 
     # Check file type
     if file.content_type != "application/pdf":
-
         raise HTTPException(
             status_code=400,
             detail="Only PDF files are allowed"
@@ -65,21 +64,15 @@ async def upload_report(
 
     # Save file
     with open(file_path, "wb") as buffer:
-
         buffer.write(
             await file.read()
         )
 
     return {
-
         "success": True,
-
         "message": "PDF uploaded successfully",
-
         "filename": unique_filename,
-
         "original_filename": file.filename,
-
         "url": f"/uploads/{unique_filename}"
     }
 
@@ -102,7 +95,6 @@ def create_patient(
             payload.aiInterview,
             ensure_ascii=False
         )
-
 
         patient = Patient(
 
@@ -160,7 +152,13 @@ def create_patient(
             # AI Interview
             # -------------------------
 
-            ai_interview=ai_interview_json
+            ai_interview=ai_interview_json,
+
+            # -------------------------
+            # Viewed Status
+            # -------------------------
+
+            viewed=False
         )
 
 
@@ -184,7 +182,9 @@ def create_patient(
 
             "ai_questions_saved": len(
                 payload.aiInterview
-            )
+            ),
+
+            "viewed": patient.viewed
         }
 
 
@@ -215,3 +215,53 @@ def get_patients(
     return db.query(
         Patient
     ).all()
+
+
+# =========================================================
+# MARK PATIENT AS VIEWED
+# =========================================================
+
+@router.patch("/{patient_id}/viewed")
+def mark_patient_viewed(
+    patient_id: int,
+    db: Session = Depends(get_db)
+):
+
+    # Find patient by database ID
+    patient = db.query(
+        Patient
+    ).filter(
+        Patient.id == patient_id
+    ).first()
+
+
+    # Patient not found
+    if not patient:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Patient not found"
+        )
+
+
+    # Mark as viewed
+    patient.viewed = True
+
+
+    # Save to database
+    db.commit()
+
+    # Refresh object
+    db.refresh(patient)
+
+
+    return {
+
+        "success": True,
+
+        "message": "Patient marked as viewed",
+
+        "patient_id": patient.id,
+
+        "viewed": patient.viewed
+    }

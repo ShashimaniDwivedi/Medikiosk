@@ -21,43 +21,25 @@ function DoctorDashboard() {
   // VIEWED STATUS
   // =====================================================
 
-  const isViewed = (patient, index) => {
-    const id = getPatientId(patient, index);
-
-    // Backend viewed field
-    if (patient.viewed === true) {
-      return true;
-    }
-
-    // Browser fallback
-    const viewedPatients = JSON.parse(
-      localStorage.getItem("medikiosk_viewed_patients") || "[]",
-    );
-
-    return viewedPatients.includes(id);
+  const isViewed = (patient) => {
+    return patient.viewed === true;
   };
 
   // =====================================================
-  // MANUALLY MARK VIEWED
+  // MARK PATIENT AS VIEWED
+  // =====================================================
+
+  // =====================================================
+  // MARK PATIENT AS VIEWED
   // =====================================================
 
   const markAsViewed = (patient, index) => {
     const id = getPatientId(patient, index);
 
-    const viewedPatients = JSON.parse(
-      localStorage.getItem("medikiosk_viewed_patients") || "[]",
-    );
+    // Show popup IMMEDIATELY
+    alert("Patient marked as viewed ✓");
 
-    if (!viewedPatients.includes(id)) {
-      viewedPatients.push(id);
-
-      localStorage.setItem(
-        "medikiosk_viewed_patients",
-        JSON.stringify(viewedPatients),
-      );
-    }
-
-    // Immediately remove from new list
+    // Update UI immediately
     setPatients((currentPatients) =>
       currentPatients.map((item, itemIndex) => {
         const itemId = getPatientId(item, itemIndex);
@@ -72,6 +54,32 @@ function DoctorDashboard() {
         return item;
       }),
     );
+
+    // Update database in background
+    fetch(`http://127.0.0.1:8000/patients/${id}/viewed`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        viewed: true,
+      }),
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.detail || "Failed to mark patient as viewed");
+        }
+
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Patient marked as viewed in database:", data);
+      })
+      .catch((error) => {
+        // Background error only
+        console.error("Background Mark Viewed Error:", error);
+      });
   };
 
   // =====================================================
@@ -181,17 +189,13 @@ function DoctorDashboard() {
   // NEW PATIENTS
   // =====================================================
 
-  const newPatients = patients.filter(
-    (patient, index) => !isViewed(patient, index),
-  );
+  const newPatients = patients.filter((patient) => !isViewed(patient));
 
   // =====================================================
   // PREVIOUS PATIENTS
   // =====================================================
 
-  const previousPatients = patients.filter((patient, index) =>
-    isViewed(patient, index),
-  );
+  const previousPatients = patients.filter((patient) => isViewed(patient));
 
   const filteredNewPatients = newPatients.filter(searchPatient);
 
@@ -424,7 +428,7 @@ function DoctorDashboard() {
                               View
                             </button>
 
-                            {/* MANUAL VIEWED */}
+                            {/* MARK VIEWED */}
 
                             <button
                               className="mark-viewed-btn"
@@ -443,9 +447,7 @@ function DoctorDashboard() {
           )}
         </section>
 
-        {/* =================================================
-            PREVIOUS PATIENTS
-            ================================================= */}
+        {/* PREVIOUS PATIENTS */}
 
         <section className="previous-patients-section">
           <div className="previous-header">

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text
+from sqlalchemy import Column, Integer, String, Text, Boolean
 from database.connection import Base
 
 
@@ -13,18 +13,24 @@ class Patient(Base):
     gender = Column(String(50))
     phone = Column(String(20))
 
+    # Symptoms
     main_problem = Column(Text)
     duration = Column(String(100))
     severity = Column(String(30))
     other_symptoms = Column(Text)
 
+    # Medical History
     illnesses = Column(Text)
     medicines = Column(Text)
     allergies = Column(Text)
     surgeries = Column(Text)
     family_history = Column(Text)
 
+    # Medical Report
     reports = Column(String(255))
 
     # AI Interview
     ai_interview = Column(Text)
+
+    # Viewed Status
+    viewed = Column(Boolean, default=False, nullable=False)

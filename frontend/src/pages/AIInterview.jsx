@@ -8,8 +8,12 @@ function AIInterview() {
 
   const [question, setQuestion] = useState("");
   const [questionNumber, setQuestionNumber] = useState(0);
-  const [answer, setAnswer] = useState("");
 
+  // Backend decides the total number of questions
+  // It will be between 5 and 10
+  const [totalQuestions, setTotalQuestions] = useState(null);
+
+  const [answer, setAnswer] = useState("");
   const [history, setHistory] = useState([]);
 
   const [loading, setLoading] = useState(false);
@@ -31,8 +35,6 @@ function AIInterview() {
           "Content-Type": "application/json",
         },
 
-        // IMPORTANT:
-        // Send Symptoms page data to Gemini
         body: JSON.stringify({
           language: patient.language || "English",
 
@@ -52,10 +54,17 @@ function AIInterview() {
         throw new Error(data.detail || "Failed to start interview");
       }
 
-      // First AI question
+      // =================================================
+      // FIRST AI QUESTION
+      // =================================================
+
       setQuestion(data.question);
 
       setQuestionNumber(data.question_number);
+
+      // Backend may not know the final number yet.
+      // It will become available when the interview finishes.
+      setTotalQuestions(data.total_questions || null);
 
       setStarted(true);
 
@@ -86,13 +95,13 @@ function AIInterview() {
     try {
       setLoading(true);
 
-      // Current question + answer
+      // Current question + current answer
       const currentItem = {
         question: question,
         answer: answer.trim(),
       };
 
-      // Complete history
+      // Add current answer to complete history
       const currentHistory = [...history, currentItem];
 
       const response = await fetch("http://127.0.0.1:8000/ai/answer", {
@@ -109,7 +118,7 @@ function AIInterview() {
 
           answer: answer.trim(),
 
-          // Previous Q/A
+          // Previous Q/A history
           history: history,
         }),
       });
@@ -120,8 +129,19 @@ function AIInterview() {
         throw new Error(data.detail || "Failed to get next question");
       }
 
-      // Save current answer
+      // =================================================
+      // SAVE CURRENT ANSWER
+      // =================================================
+
       setHistory(currentHistory);
+
+      // =================================================
+      // BACKEND DECIDED TOTAL QUESTIONS
+      // =================================================
+
+      if (data.total_questions) {
+        setTotalQuestions(data.total_questions);
+      }
 
       // =================================================
       // INTERVIEW FINISHED
@@ -130,8 +150,6 @@ function AIInterview() {
       if (data.finished) {
         setFinished(true);
 
-        // Save all AI questions + answers
-        // into PatientContext
         setPatientData({
           aiInterview: currentHistory,
         });
@@ -201,7 +219,10 @@ function AIInterview() {
               answers.
             </p>
 
-            <p>Your responses will help prepare your medical history.</p>
+            <p>
+              The number of questions will adapt automatically based on your
+              responses.
+            </p>
 
             <button
               className="start-btn"
@@ -219,9 +240,12 @@ function AIInterview() {
 
         {started && !finished && (
           <div className="question-section">
-            {/* Progress */}
+            {/* Dynamic Progress */}
 
-            <div className="progress">Question {questionNumber} of 10</div>
+            <div className="progress">
+              Question {questionNumber}
+              {totalQuestions ? ` of ${totalQuestions}` : ""}
+            </div>
 
             {/* Question */}
 
@@ -262,6 +286,15 @@ function AIInterview() {
             <h2>Interview Completed</h2>
 
             <p>Your responses have been recorded successfully.</p>
+
+            {/* Final Question Count */}
+
+            {totalQuestions && (
+              <p>
+                Interview completed with{" "}
+                <strong>{totalQuestions} questions</strong>.
+              </p>
+            )}
 
             {/* Interview Summary */}
 
