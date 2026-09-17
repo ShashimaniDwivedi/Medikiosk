@@ -32,6 +32,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "https://medikiosk-a5yn.vercel.app",
         "http://localhost:5173"
     ],
     allow_credentials=True,
