@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 
 function Review() {
   const { patient, setPatientData, clearPatient } = usePatient();
-
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
@@ -34,7 +33,6 @@ function Review() {
         // IMPORTANT:
         // This MUST match upload.single("file")
         // in pdfRoutes.js
-
         formData.append("file", patient.reportFile);
 
         const uploadResponse = await fetch(
@@ -52,13 +50,11 @@ function Review() {
         }
 
         // Cloudinary URL
-
         reportUrl = uploadData.url;
 
         console.log("Cloudinary URL:", reportUrl);
 
         // Save URL in React state
-
         setPatientData({
           reports: reportUrl,
         });
@@ -73,7 +69,7 @@ function Review() {
         // LANGUAGE
         // =================================================
 
-        // language: patient.language || "",
+        language: patient.language || "",
 
         // =================================================
         // PATIENT DETAILS
@@ -132,7 +128,7 @@ function Review() {
       // SEND TO FASTAPI
       // =================================================
 
-      fetch(`${import.meta.env.VITE_API_URL}/patients`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/patients`, {
         method: "POST",
 
         headers: {
@@ -156,7 +152,7 @@ function Review() {
       // SUCCESS
       // =================================================
 
-      alert(`Patient information submitted successfully!\n`);
+      alert("Patient information submitted successfully!");
 
       console.log("Patient saved:", data);
 
@@ -166,7 +162,6 @@ function Review() {
 
       // Important for kiosk.
       // Next patient will get an empty form.
-
       clearPatient();
 
       // =================================================
