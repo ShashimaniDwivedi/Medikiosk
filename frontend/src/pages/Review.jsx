@@ -38,7 +38,7 @@ function Review() {
         formData.append("file", patient.reportFile);
 
         const uploadResponse = await fetch(
-          "http://localhost:5000/api/pdf/upload",
+          `${import.meta.env.VITE_UPLOAD_URL}/api/pdf/upload`,
           {
             method: "POST",
             body: formData,
@@ -132,7 +132,7 @@ function Review() {
       // SEND TO FASTAPI
       // =================================================
 
-      const response = await fetch("http://127.0.0.1:8000/patients", {
+      fetch(`${import.meta.env.VITE_API_URL}/patients`, {
         method: "POST",
 
         headers: {

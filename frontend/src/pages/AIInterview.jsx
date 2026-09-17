@@ -28,7 +28,7 @@ function AIInterview() {
     try {
       setLoading(true);
 
-      const response = await fetch("http://127.0.0.1:8000/ai/start", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/ai/start`, {
         method: "POST",
 
         headers: {
@@ -110,24 +110,27 @@ function AIInterview() {
       // Add current answer to complete history
       const currentHistory = [...history, currentItem];
 
-      const response = await fetch("http://127.0.0.1:8000/ai/answer", {
-        method: "POST",
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/ai/answer`,
+        {
+          method: "POST",
 
-        headers: {
-          "Content-Type": "application/json",
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            question_number: questionNumber,
+
+            question: question,
+
+            answer: answer.trim(),
+
+            // Previous Q/A history
+            history: history,
+          }),
         },
-
-        body: JSON.stringify({
-          question_number: questionNumber,
-
-          question: question,
-
-          answer: answer.trim(),
-
-          // Previous Q/A history
-          history: history,
-        }),
-      });
+      );
 
       const data = await response.json();
 
