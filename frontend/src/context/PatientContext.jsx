@@ -23,52 +23,26 @@ const emptyPatient = {
   reports: "",
   reportFile: null,
 
-  // AI interview answers
   aiInterview: [],
 };
 
 export const PatientProvider = ({ children }) => {
-  const [patient, setPatient] = useState(() => {
-    const savedData = localStorage.getItem("medikiosk_patient");
-
-    if (savedData) {
-      try {
-        return {
-          ...emptyPatient,
-          ...JSON.parse(savedData),
-
-          // File cannot be stored in localStorage
-          reportFile: null,
-        };
-      } catch (error) {
-        console.error("Failed to load patient data:", error);
-      }
-    }
-
-    return {
-      ...emptyPatient,
-    };
+  // Always start with empty patient
+  const [patient, setPatient] = useState({
+    ...emptyPatient,
   });
 
-  // -----------------------------
-  // SAVE DATA TO LOCAL STORAGE
-  // -----------------------------
-
+  // Save current patient to localStorage
   useEffect(() => {
     const dataToSave = {
       ...patient,
-
-      // File object cannot be stored
       reportFile: null,
     };
 
     localStorage.setItem("medikiosk_patient", JSON.stringify(dataToSave));
   }, [patient]);
 
-  // -----------------------------
-  // UPDATE ONE FIELD
-  // -----------------------------
-
+  // Update one field
   const updatePatient = (field, value) => {
     setPatient((previous) => ({
       ...previous,
@@ -76,10 +50,7 @@ export const PatientProvider = ({ children }) => {
     }));
   };
 
-  // -----------------------------
-  // UPDATE MULTIPLE FIELDS
-  // -----------------------------
-
+  // Update multiple fields
   const setPatientData = (data) => {
     setPatient((previous) => ({
       ...previous,
@@ -87,10 +58,7 @@ export const PatientProvider = ({ children }) => {
     }));
   };
 
-  // -----------------------------
-  // CLEAR PATIENT
-  // -----------------------------
-
+  // Clear patient
   const clearPatient = () => {
     setPatient({
       ...emptyPatient,

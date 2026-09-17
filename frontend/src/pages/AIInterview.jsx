@@ -87,6 +87,12 @@ function AIInterview() {
   // =====================================================
 
   const submitAnswer = async () => {
+    // Prevent multiple submissions
+    if (loading) {
+      return;
+    }
+
+    // Don't submit empty answer
     if (!answer.trim()) {
       alert("Please enter your answer.");
       return;
@@ -178,6 +184,21 @@ function AIInterview() {
   };
 
   // =====================================================
+  // HANDLE ENTER KEY
+  // =====================================================
+
+  const handleAnswerKeyDown = (e) => {
+    // Enter without Shift = submit answer
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+
+      submitAnswer();
+    }
+
+    // Shift + Enter = normal new line
+  };
+
+  // =====================================================
   // CONTINUE TO MEDICAL HISTORY
   // =====================================================
 
@@ -258,6 +279,7 @@ function AIInterview() {
             <textarea
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
+              onKeyDown={handleAnswerKeyDown}
               placeholder="Type your answer here..."
               rows={5}
               disabled={loading}
@@ -272,6 +294,14 @@ function AIInterview() {
             >
               {loading ? "Thinking..." : "Next →"}
             </button>
+
+            {/* Enter Hint */}
+
+            <p className="enter-hint">
+              Press <strong>Enter</strong> to continue
+              {" • "}
+              <strong>Shift + Enter</strong> for a new line
+            </p>
           </div>
         )}
 

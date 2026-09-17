@@ -3,7 +3,7 @@ import { usePatient } from "../context/usePatient";
 import { useNavigate } from "react-router-dom";
 
 function Review() {
-  const { patient, setPatientData } = usePatient();
+  const { patient, setPatientData, clearPatient } = usePatient();
 
   const navigate = useNavigate();
 
@@ -14,11 +14,16 @@ function Review() {
   // =====================================================
 
   const handleSubmit = async () => {
+    // Prevent double click
+    if (loading) {
+      return;
+    }
+
     try {
       setLoading(true);
 
       // =================================================
-      // PDF CLOUDINARY UPLOAD
+      // UPLOAD PDF / IMAGE TO CLOUDINARY
       // =================================================
 
       let reportUrl = patient.reports || "";
@@ -26,7 +31,11 @@ function Review() {
       if (patient.reportFile) {
         const formData = new FormData();
 
-        formData.append("pdf", patient.reportFile);
+        // IMPORTANT:
+        // This MUST match upload.single("file")
+        // in pdfRoutes.js
+
+        formData.append("file", patient.reportFile);
 
         const uploadResponse = await fetch(
           "http://localhost:5000/api/pdf/upload",
@@ -39,12 +48,17 @@ function Review() {
         const uploadData = await uploadResponse.json();
 
         if (!uploadResponse.ok) {
-          throw new Error(uploadData.message || "PDF upload failed");
+          throw new Error(uploadData.message || "Medical report upload failed");
         }
+
+        // Cloudinary URL
 
         reportUrl = uploadData.url;
 
-        // Save Cloudinary URL
+        console.log("Cloudinary URL:", reportUrl);
+
+        // Save URL in React state
+
         setPatientData({
           reports: reportUrl,
         });
@@ -55,7 +69,15 @@ function Review() {
       // =================================================
 
       const patientData = {
-        language: patient.language || "",
+        // =================================================
+        // LANGUAGE
+        // =================================================
+
+        // language: patient.language || "",
+
+        // =================================================
+        // PATIENT DETAILS
+        // =================================================
 
         name: patient.name || "",
 
@@ -65,7 +87,9 @@ function Review() {
 
         phone: patient.phone || "",
 
-        // Symptoms
+        // =================================================
+        // SYMPTOMS
+        // =================================================
 
         mainProblem: patient.mainProblem || "",
 
@@ -75,7 +99,9 @@ function Review() {
 
         otherSymptoms: patient.otherSymptoms || "",
 
-        // Medical History
+        // =================================================
+        // MEDICAL HISTORY
+        // =================================================
 
         illnesses: patient.illnesses || "",
 
@@ -87,14 +113,20 @@ function Review() {
 
         familyHistory: patient.familyHistory || "",
 
-        // PDF
+        // =================================================
+        // MEDICAL REPORT
+        // =================================================
 
         reports: reportUrl,
 
-        // AI Interview
+        // =================================================
+        // AI INTERVIEW
+        // =================================================
 
         aiInterview: patient.aiInterview || [],
       };
+
+      console.log("Sending patient data:", patientData);
 
       // =================================================
       // SEND TO FASTAPI
@@ -112,6 +144,10 @@ function Review() {
 
       const data = await response.json();
 
+      // =================================================
+      // FASTAPI ERROR
+      // =================================================
+
       if (!response.ok) {
         throw new Error(data.detail || "Failed to submit patient information");
       }
@@ -120,11 +156,24 @@ function Review() {
       // SUCCESS
       // =================================================
 
-      alert(
-        `Patient information submitted successfully!\nPatient ID: ${data.patient_id}`,
-      );
+      alert(`Patient information submitted successfully!\n`);
 
       console.log("Patient saved:", data);
+
+      // =================================================
+      // CLEAR PATIENT DATA
+      // =================================================
+
+      // Important for kiosk.
+      // Next patient will get an empty form.
+
+      clearPatient();
+
+      // =================================================
+      // GO TO FIRST PAGE
+      // =================================================
+
+      navigate("/");
     } catch (error) {
       console.error("Submit Error:", error);
 
@@ -133,6 +182,10 @@ function Review() {
       setLoading(false);
     }
   };
+
+  // =====================================================
+  // UI
+  // =====================================================
 
   return (
     <div className="review-page">
@@ -146,20 +199,6 @@ function Review() {
         <h1>Review Your Information</h1>
 
         <p>Please review your information before submitting.</p>
-
-        {/* =================================================
-            LANGUAGE
-        ================================================= */}
-
-        <div className="review-section">
-          <h2>Language</h2>
-
-          <div className="info-row">
-            <span>Selected Language</span>
-
-            <strong>{patient.language || "Not provided"}</strong>
-          </div>
-        </div>
 
         {/* =================================================
             PATIENT DETAILS
@@ -261,6 +300,10 @@ function Review() {
 
             <strong>{patient.familyHistory || "None"}</strong>
           </div>
+
+          {/* =================================================
+              MEDICAL REPORT
+          ================================================= */}
 
           <div className="info-row">
             <span>Medical Report</span>

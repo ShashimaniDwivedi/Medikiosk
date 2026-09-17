@@ -17,6 +17,10 @@ function MedicalHistory() {
     reportFile: patient.reportFile || null,
   });
 
+  // =====================================================
+  // HANDLE TEXT FIELD CHANGE
+  // =====================================================
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -26,9 +30,14 @@ function MedicalHistory() {
     }));
   };
 
+  // =====================================================
+  // HANDLE PDF / IMAGE UPLOAD
+  // =====================================================
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
 
+    // No file selected
     if (!file) {
       setFormData((previous) => ({
         ...previous,
@@ -39,19 +48,35 @@ function MedicalHistory() {
       return;
     }
 
-    // Only PDF allowed
-    if (file.type !== "application/pdf") {
-      alert("Please select a PDF file only.");
+    // =================================================
+    // ALLOWED FILE TYPES
+    // =================================================
+
+    const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
+
+    if (!allowedTypes.includes(file.type)) {
+      alert("Please select a PDF, JPG, JPEG, or PNG file only.");
+
       e.target.value = "";
+
       return;
     }
 
-    // Maximum 10 MB
+    // =================================================
+    // MAXIMUM FILE SIZE = 10 MB
+    // =================================================
+
     if (file.size > 10 * 1024 * 1024) {
-      alert("PDF must be less than 10 MB.");
+      alert("File must be less than 10 MB.");
+
       e.target.value = "";
+
       return;
     }
+
+    // =================================================
+    // SAVE FILE
+    // =================================================
 
     setFormData((previous) => ({
       ...previous,
@@ -59,6 +84,10 @@ function MedicalHistory() {
       reportFile: file,
     }));
   };
+
+  // =====================================================
+  // SUBMIT
+  // =====================================================
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -71,6 +100,8 @@ function MedicalHistory() {
   return (
     <div className="history-page">
       <div className="history-card">
+        {/* LOGO */}
+
         <div className="logo">📋</div>
 
         <h1>Medical History</h1>
@@ -78,7 +109,10 @@ function MedicalHistory() {
         <p>Tell us about your previous medical history.</p>
 
         <form onSubmit={handleSubmit}>
-          {/* Previous Illnesses */}
+          {/* =================================================
+              PREVIOUS ILLNESSES
+          ================================================= */}
+
           <div className="form-group">
             <label>Previous Illnesses</label>
 
@@ -91,7 +125,10 @@ function MedicalHistory() {
             />
           </div>
 
-          {/* Current Medicines */}
+          {/* =================================================
+              CURRENT MEDICINES
+          ================================================= */}
+
           <div className="form-group">
             <label>Current Medicines</label>
 
@@ -104,7 +141,10 @@ function MedicalHistory() {
             />
           </div>
 
-          {/* Allergies */}
+          {/* =================================================
+              ALLERGIES
+          ================================================= */}
+
           <div className="form-group">
             <label>Allergies</label>
 
@@ -117,7 +157,10 @@ function MedicalHistory() {
             />
           </div>
 
-          {/* Previous Surgeries */}
+          {/* =================================================
+              PREVIOUS SURGERIES
+          ================================================= */}
+
           <div className="form-group">
             <label>Previous Surgeries</label>
 
@@ -130,7 +173,10 @@ function MedicalHistory() {
             />
           </div>
 
-          {/* Family History */}
+          {/* =================================================
+              FAMILY HISTORY
+          ================================================= */}
+
           <div className="form-group">
             <label>Family Medical History</label>
 
@@ -143,21 +189,36 @@ function MedicalHistory() {
             />
           </div>
 
-          {/* Medical Report */}
+          {/* =================================================
+              MEDICAL REPORT
+          ================================================= */}
+
           <div className="form-group">
             <label>Upload Medical Report</label>
 
             <input
               type="file"
-              accept="application/pdf"
+              accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
               onChange={handleFileChange}
             />
 
-            <small>Supported format: PDF | Maximum size: 10 MB</small>
+            <small>
+              Supported formats: PDF, JPG, JPEG, PNG
+              <br />
+              Maximum size: 10 MB
+            </small>
+
+            {/* =================================================
+                SELECTED FILE
+            ================================================= */}
 
             {formData.reportFile && (
               <div className="selected-report">
-                <p>📄 Selected file:</p>
+                <p>
+                  {formData.reportFile.type === "application/pdf"
+                    ? "📄 Selected PDF:"
+                    : "🖼️ Selected Photo:"}
+                </p>
 
                 <strong>{formData.reportFile.name}</strong>
 
@@ -168,7 +229,10 @@ function MedicalHistory() {
             )}
           </div>
 
-          {/* Continue */}
+          {/* =================================================
+              CONTINUE
+          ================================================= */}
+
           <button type="submit" className="continue-btn">
             Continue →
           </button>
