@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+// API URL
+// Local: http://127.0.0.1:8000
+// Production: VITE_API_URL from Vercel Environment Variables
+const API_URL = import.meta.env.VITE_API_URL;
+
 function DoctorDashboard() {
   const navigate = useNavigate();
 
@@ -29,10 +34,6 @@ function DoctorDashboard() {
   // MARK PATIENT AS VIEWED
   // =====================================================
 
-  // =====================================================
-  // MARK PATIENT AS VIEWED
-  // =====================================================
-
   const markAsViewed = (patient, index) => {
     const id = getPatientId(patient, index);
 
@@ -56,7 +57,7 @@ function DoctorDashboard() {
     );
 
     // Update database in background
-    fetch(`http://127.0.0.1:8000/patients/${id}/viewed`, {
+    fetch(`${API_URL}/patients/${id}/viewed`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -91,7 +92,7 @@ function DoctorDashboard() {
 
     async function loadPatients() {
       try {
-        const response = await fetch("http://127.0.0.1:8000/patients");
+        const response = await fetch(`${API_URL}/patients`);
 
         if (!response.ok) {
           throw new Error(`Server returned ${response.status}`);
@@ -137,7 +138,7 @@ function DoctorDashboard() {
       setLoading(true);
       setError("");
 
-      const response = await fetch("http://127.0.0.1:8000/patients");
+      const response = await fetch(`${API_URL}/patients`);
 
       if (!response.ok) {
         throw new Error(`Server returned ${response.status}`);

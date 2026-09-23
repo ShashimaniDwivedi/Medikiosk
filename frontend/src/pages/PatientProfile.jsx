@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+// API URL
+// Local: http://127.0.0.1:8000
+// Production: VITE_API_URL from Vercel
+const API_URL = import.meta.env.VITE_API_URL;
+
 function PatientProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -18,7 +23,7 @@ function PatientProfile() {
 
     async function loadPatient() {
       try {
-        const response = await fetch("http://127.0.0.1:8000/patients");
+        const response = await fetch(`${API_URL}/patients`);
 
         if (!response.ok) {
           throw new Error(`Server returned ${response.status}`);
@@ -157,7 +162,6 @@ function PatientProfile() {
 
           <div>
             <h1>Patient Profile</h1>
-
             <p>MediKiosk Medical Record</p>
           </div>
         </div>
@@ -208,7 +212,6 @@ function PatientProfile() {
 
             <div>
               <h2>Personal Information</h2>
-
               <p>Basic patient details</p>
             </div>
           </div>
@@ -256,7 +259,6 @@ function PatientProfile() {
 
             <div>
               <h2>Symptoms & Complaint</h2>
-
               <p>Information provided by the patient</p>
             </div>
           </div>
@@ -400,7 +402,6 @@ function PatientProfile() {
 
             <div>
               <h2>Medical Report</h2>
-
               <p>Uploaded document</p>
             </div>
           </div>
